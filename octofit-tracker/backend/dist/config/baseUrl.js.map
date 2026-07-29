@@ -1,0 +1,1 @@
+{"version":3,"file":"baseUrl.js","sourceRoot":"","sources":["../../src/config/baseUrl.ts"],"names":[],"mappings":";;;;AAAA,MAAM,IAAI,GAAG,IAAI,CAAC;AAElB;IACE,MAAM,aAAa,GAAG,OAAO,CAAC,GAAG,CAAC,cAAc,CAAC;IAEjD,OAAO,aAAa;QAClB,CAAC,CAAC,WAAW,aAAa,IAAI,IAAI,iBAAiB;QACnD,CAAC,CAAC,oBAAoB,IAAI,EAAE,CAAC;AACjC,CAAC;AAEY,QAAA,OAAO,GAAG,IAAI,CAAC"}
