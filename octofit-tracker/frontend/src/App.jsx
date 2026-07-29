@@ -1,121 +1,161 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
+import { useEffect, useState } from 'react'
+import { getApiBaseUrl } from './config/api'
 import './App.css'
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [data, setData] = useState({ users: [], activities: [] })
+  const [status, setStatus] = useState({ loading: true, error: '' })
+  const [baseUrl] = useState(getApiBaseUrl())
+
+  useEffect(() => {
+    const controller = new AbortController()
+
+    async function loadData() {
+      setStatus({ loading: true, error: '' })
+
+      try {
+        const [usersResponse, activitiesResponse] = await Promise.all([
+          fetch(`${baseUrl}/api/users/`, { signal: controller.signal }),
+          fetch(`${baseUrl}/api/activities/`, { signal: controller.signal }),
+        ])
+
+        if (!usersResponse.ok || !activitiesResponse.ok) {
+          throw new Error('Unable to load OctoFit data')
+        }
+
+        const [usersPayload, activitiesPayload] = await Promise.all([
+          usersResponse.json(),
+          activitiesResponse.json(),
+        ])
+
+        setData({
+          users: usersPayload.items ?? [],
+          activities: activitiesPayload.items ?? [],
+        })
+      } catch (error) {
+        if (error.name !== 'AbortError') {
+          setStatus({
+            loading: false,
+            error: 'Could not reach the API. Check that the backend is running on port 8000.',
+          })
+          return
+        }
+      }
+
+      setStatus({ loading: false, error: '' })
+    }
+
+    loadData()
+
+    return () => controller.abort()
+  }, [baseUrl])
+
+  const totalWeeklyMinutes = data.users.reduce(
+    (sum, user) => sum + (user.weeklyActiveMinutes ?? 0),
+    0,
+  )
+
+  const latestActivity = data.activities[0]
+
+  const currencyDate = new Intl.DateTimeFormat('en', {
+    month: 'short',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+  })
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
+    <main className="app-shell">
+      <section className="hero-panel">
         <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
+          <p className="eyebrow">OctoFit Tracker</p>
+          <h1>Live API dashboard</h1>
+          <p className="lede">
+            The frontend reads from the Node.js API using the current host, so
+            it works on localhost and in Codespaces.
           </p>
         </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
+
+        <div className="status-chip">
+          <span className="status-dot" />
+          <span>{status.loading ? 'Loading data' : 'API connected'}</span>
+        </div>
+
+        <div className="base-url">API base: {baseUrl}</div>
       </section>
 
-      <div className="ticks"></div>
+      {status.error ? <div className="error-banner">{status.error}</div> : null}
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
+      <section className="metrics-grid">
+        <article className="metric-card">
+          <span>Users</span>
+          <strong>{data.users.length}</strong>
+        </article>
+        <article className="metric-card">
+          <span>Activities</span>
+          <strong>{data.activities.length}</strong>
+        </article>
+        <article className="metric-card">
+          <span>Total weekly minutes</span>
+          <strong>{totalWeeklyMinutes}</strong>
+        </article>
       </section>
 
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
+      <section className="content-grid">
+        <article className="panel">
+          <div className="panel-header">
+            <h2>Team members</h2>
+            <span>{data.users.length} records</span>
+          </div>
+
+          <div className="stack">
+            {data.users.map((user) => (
+              <div className="row-card" key={user._id}>
+                <div>
+                  <h3>{user.name}</h3>
+                  <p>{user.location}</p>
+                </div>
+                <div className="row-meta">
+                  <span>{user.fitnessLevel}</span>
+                  <strong>{user.weeklyActiveMinutes} min</strong>
+                </div>
+              </div>
+            ))}
+          </div>
+        </article>
+
+        <article className="panel">
+          <div className="panel-header">
+            <h2>Recent activity</h2>
+            <span>{data.activities.length} records</span>
+          </div>
+
+          <div className="stack">
+            {data.activities.map((activity) => (
+              <div className="row-card" key={activity._id}>
+                <div>
+                  <h3>{activity.type}</h3>
+                  <p>
+                    {activity.user?.name} · {activity.team?.name ?? 'Solo'}
+                  </p>
+                </div>
+                <div className="row-meta">
+                  <span>{currencyDate.format(new Date(activity.completedAt))}</span>
+                  <strong>{activity.durationMinutes} min</strong>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {latestActivity ? (
+            <div className="summary-box">
+              Latest completion: {latestActivity.type} on{' '}
+              {currencyDate.format(new Date(latestActivity.completedAt))}
+            </div>
+          ) : null}
+        </article>
+      </section>
+    </main>
   )
 }
 
