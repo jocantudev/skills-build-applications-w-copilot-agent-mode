@@ -1,6 +1,6 @@
 import express from 'express';
 import cors from 'cors';
-import db from './config/database';
+import './config/database';
 
 const app = express();
 const port = 8000;
@@ -10,9 +10,11 @@ const baseUrl = codespaceName
   ? `https://${codespaceName}-8000.app.github.dev`
   : `http://localhost:${port}`;
 
-app.use(cors({
-  origin: '*',
-}));
+const allowedOrigins = codespaceName
+  ? [`https://${codespaceName}-5173.app.github.dev`]
+  : ['http://localhost:5173'];
+
+app.use(cors({ origin: allowedOrigins }));
 app.use(express.json());
 
 app.get('/api/', (req, res) => {
