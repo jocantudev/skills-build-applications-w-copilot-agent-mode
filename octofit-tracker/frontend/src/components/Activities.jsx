@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 import { getResourceApiUrl, normalizeCollectionPayload } from '../config/api'
 
+const activitiesCodespaceApiUrl = `https://${import.meta.env.VITE_CODESPACE_NAME}-8000.app.github.dev/api/activities/`
+
 const dateFormatter = new Intl.DateTimeFormat('en', {
   month: 'short',
   day: 'numeric',
@@ -20,9 +22,14 @@ function Activities() {
       setStatus({ loading: true, error: '' })
 
       try {
-        const response = await fetch(getResourceApiUrl('activities'), {
+        const response = await fetch(
+          import.meta.env.VITE_CODESPACE_NAME
+            ? activitiesCodespaceApiUrl
+            : getResourceApiUrl('activities'),
+          {
           signal: controller.signal,
-        })
+          },
+        )
 
         if (!response.ok) {
           throw new Error('Unable to load activities')

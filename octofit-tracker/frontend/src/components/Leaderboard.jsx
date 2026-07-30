@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 import { getResourceApiUrl, normalizeCollectionPayload } from '../config/api'
 
+const leaderboardCodespaceApiUrl = `https://${import.meta.env.VITE_CODESPACE_NAME}-8000.app.github.dev/api/leaderboard/`
+
 function Leaderboard() {
   const [entries, setEntries] = useState([])
   const [count, setCount] = useState(0)
@@ -13,9 +15,14 @@ function Leaderboard() {
       setStatus({ loading: true, error: '' })
 
       try {
-        const response = await fetch(getResourceApiUrl('leaderboard'), {
+        const response = await fetch(
+          import.meta.env.VITE_CODESPACE_NAME
+            ? leaderboardCodespaceApiUrl
+            : getResourceApiUrl('leaderboard'),
+          {
           signal: controller.signal,
-        })
+          },
+        )
 
         if (!response.ok) {
           throw new Error('Unable to load leaderboard')

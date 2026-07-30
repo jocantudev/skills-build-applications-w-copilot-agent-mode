@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 import { getResourceApiUrl, normalizeCollectionPayload } from '../config/api'
 
+const workoutsCodespaceApiUrl = `https://${import.meta.env.VITE_CODESPACE_NAME}-8000.app.github.dev/api/workouts/`
+
 function Workouts() {
   const [workouts, setWorkouts] = useState([])
   const [count, setCount] = useState(0)
@@ -13,9 +15,14 @@ function Workouts() {
       setStatus({ loading: true, error: '' })
 
       try {
-        const response = await fetch(getResourceApiUrl('workouts'), {
+        const response = await fetch(
+          import.meta.env.VITE_CODESPACE_NAME
+            ? workoutsCodespaceApiUrl
+            : getResourceApiUrl('workouts'),
+          {
           signal: controller.signal,
-        })
+          },
+        )
 
         if (!response.ok) {
           throw new Error('Unable to load workouts')

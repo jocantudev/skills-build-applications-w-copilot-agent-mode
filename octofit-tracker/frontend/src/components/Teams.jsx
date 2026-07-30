@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 import { getResourceApiUrl, normalizeCollectionPayload } from '../config/api'
 
+const teamsCodespaceApiUrl = `https://${import.meta.env.VITE_CODESPACE_NAME}-8000.app.github.dev/api/teams/`
+
 function Teams() {
   const [teams, setTeams] = useState([])
   const [count, setCount] = useState(0)
@@ -13,9 +15,12 @@ function Teams() {
       setStatus({ loading: true, error: '' })
 
       try {
-        const response = await fetch(getResourceApiUrl('teams'), {
+        const response = await fetch(
+          import.meta.env.VITE_CODESPACE_NAME ? teamsCodespaceApiUrl : getResourceApiUrl('teams'),
+          {
           signal: controller.signal,
-        })
+          },
+        )
 
         if (!response.ok) {
           throw new Error('Unable to load teams')

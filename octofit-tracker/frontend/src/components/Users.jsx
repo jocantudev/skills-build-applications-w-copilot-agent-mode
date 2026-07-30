@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 import { getResourceApiUrl, normalizeCollectionPayload } from '../config/api'
 
+const usersCodespaceApiUrl = `https://${import.meta.env.VITE_CODESPACE_NAME}-8000.app.github.dev/api/users/`
+
 function Users() {
   const [users, setUsers] = useState([])
   const [count, setCount] = useState(0)
@@ -13,9 +15,12 @@ function Users() {
       setStatus({ loading: true, error: '' })
 
       try {
-        const response = await fetch(getResourceApiUrl('users'), {
+        const response = await fetch(
+          import.meta.env.VITE_CODESPACE_NAME ? usersCodespaceApiUrl : getResourceApiUrl('users'),
+          {
           signal: controller.signal,
-        })
+          },
+        )
 
         if (!response.ok) {
           throw new Error('Unable to load users')
