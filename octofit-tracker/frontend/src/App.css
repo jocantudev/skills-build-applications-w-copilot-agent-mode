@@ -80,6 +80,10 @@
   align-items: start;
 }
 
+.content-grid-single {
+  grid-template-columns: 1fr;
+}
+
 .metric-card {
   padding: 20px 22px;
   text-align: left;
@@ -147,6 +151,16 @@
 .summary-box,
 .error-banner {
   margin-top: 16px;
+}
+
+.resource-nav .nav-link {
+  border-radius: 999px;
+  padding: 8px 14px;
+}
+
+.resource-nav .nav-link.active {
+  background: #0f766e;
+  border-color: #0f766e;
 }
 
 .error-banner {
